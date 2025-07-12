@@ -13,7 +13,7 @@ RED_SPACE_SHIP = pygame.image.load(os.path.join("assets", "pixel_ship_red_small.
 GREEN_SPACE_SHIP = pygame.image.load(os.path.join("assets", "pixel_ship_green_small.png"))
 BLUE_SPACE_SHIP = pygame.image.load(os.path.join("assets", "pixel_ship_blue_small.png"))
 
-# Player's ship
+# Player's player
 YELLOW_SPACE_SHIP = pygame.image.load(os.path.join("assets", "pixel_ship_yellow.png"))
 
 # Lasers
@@ -25,12 +25,37 @@ YELLOW_LASER = pygame.image.load(os.path.join("assets", "pixel_laser_yellow.png"
 # Background
 BG = pygame.transform.scale(pygame.image.load(os.path.join("assets", "background-black.png")) , (WIDTH, HEIGHT))
 
+class Ship:
+    def __init__(self, x, y, health=100):
+        self.x = x
+        self.y = y
+        self.health = health
+        self.ship_img = None
+        self.laser_img = None
+        self.lasers = []
+        self.cool_down_counter = 0
+
+    def draw(self, window):
+        window.blit(self.ship_img, (self.x, self.y))
+
+class Player(Ship):
+    def __init__(self, x, y, health=100):
+        super().__init__(x, y, health)
+        self.ship_img = YELLOW_SPACE_SHIP
+        self.laser_img = YELLOW_LASER
+        self.mask = pygame.mask.from_surface(self.ship_img)
+        self.max_health = health
+
 def main():
     run = True
     FPS = 60
     level = 1
     lives = 5
     main_font = pygame.font.SysFont("comicsans", 40)
+
+    player_velocity = 5
+
+    player = Player(300, 500)
     clock = pygame.time.Clock()
 
     def draw_window():
@@ -41,7 +66,8 @@ def main():
 
         WIN.blit(level_label, (10, 10))
         WIN.blit(lives_label, (WIDTH - lives_label.get_width() - 10, 10))
-        WIN.blit(YELLOW_SPACE_SHIP, (350, 500))
+        player.draw(WIN)
+
         pygame.display.update()
 
     while run:
@@ -50,5 +76,15 @@ def main():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 run = False
+
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_LEFT] and player.x - player_velocity > 0: 
+            player.x -= player_velocity
+        if keys[pygame.K_RIGHT] and player.x + player_velocity + 90 < WIDTH:
+            player.x += player_velocity
+        if keys[pygame.K_UP] and player.y - player_velocity > 0:
+            player.y -= player_velocity
+        if keys[pygame.K_DOWN] and player.y + player_velocity + 90 < HEIGHT:
+            player.y += player_velocity
 
 main()
